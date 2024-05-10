@@ -1,7 +1,7 @@
-import { FC, useContext } from 'react';
+import { FC, useContext, useMemo } from 'react';
 import { Column as ColumnInterface } from '../types/Column';
 import { IconPlus } from '@tabler/icons-react';
-import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Task } from '../types/Task';
 import TaskCard from './TaskCard';
@@ -15,6 +15,7 @@ interface ColumnContainerProps {
 
 const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
   const { deleteColumn, updateColumn, createTask } = useContext(BoardContext);
+  const tasksIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
 
   const {
     setNodeRef,
@@ -25,12 +26,15 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
     isDragging,
   } = useSortable({
     id: column.id,
-    data: { type: 'Column', column },
+    data: {
+      type: 'Column',
+      column,
+    },
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
     transition,
+    transform: CSS.Transform.toString(transform),
   };
 
   if (isDragging) {
@@ -80,9 +84,11 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
       </div>
       {/*tasks container */}
       <div className="flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto">
-        {tasks.map((t) => (
-          <TaskCard key={t.id} task={t} />
-        ))}
+        <SortableContext items={tasksIds}>
+          {tasks.map((t) => (
+            <TaskCard key={t.id} task={t} />
+          ))}
+        </SortableContext>
       </div>
       <button
         className="
