@@ -1,6 +1,6 @@
 import { IconPlus } from '@tabler/icons-react';
 import { Column } from '../types/Column';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import ColumnContainer from '../components/ColumnContainer';
 import {
   DndContext,
@@ -13,9 +13,10 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
+import { BoardContext } from '../context/BoardContext';
 
 const BoardPage = () => {
-  const [columns, setColumns] = useState<Column[]>([]);
+  const { columns, setColumns } = useContext(BoardContext);
   const columnsIds = useMemo(
     () => columns.map((column) => column.id),
     [columns]
@@ -27,28 +28,7 @@ const BoardPage = () => {
     })
   );
 
-  const createColumn = () => {
-    const columnToAdd: Column = {
-      id: columns.length + 1,
-      title: `Column ${columns.length + 1}`,
-    };
-    setColumns([...columns, columnToAdd]);
-  };
-
-  function deleteColumn(id: number) {
-    const filteredColumns = columns.filter((col) => col.id !== id);
-    setColumns(filteredColumns);
-  }
-
-  const updateColumn = (columnId: number, title: string) => {
-    const updatedColumns = columns.map((column) => {
-      if (column.id === columnId) {
-        return { ...column, title };
-      }
-      return column;
-    });
-    setColumns(updatedColumns);
-  };
+  const { tasks, createColumn } = useContext(BoardContext);
 
   const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === 'Column') {
@@ -126,8 +106,7 @@ const BoardPage = () => {
                 <ColumnContainer
                   key={column.id}
                   column={column}
-                  deleteColumn={deleteColumn}
-                  updateColumn={updateColumn}
+                  tasks={tasks.filter((t) => t.columnId === column.id)}
                 />
               ))}
             </SortableContext>
@@ -138,8 +117,7 @@ const BoardPage = () => {
             {activeColumn && (
               <ColumnContainer
                 column={activeColumn}
-                deleteColumn={deleteColumn}
-                updateColumn={updateColumn}
+                tasks={tasks.filter((t) => t.columnId === activeColumn.id)}
               />
             )}
           </DragOverlay>,

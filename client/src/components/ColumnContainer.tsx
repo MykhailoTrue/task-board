@@ -1,21 +1,20 @@
-import { FC, useState } from 'react';
+import { FC, useContext } from 'react';
 import { Column as ColumnInterface } from '../types/Column';
-import { IconTrash } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Task } from '../types/Task';
+import TaskCard from './TaskCard';
+import EditableHeader from './EditableHeader';
+import { BoardContext } from '../context/BoardContext';
 
 interface ColumnContainerProps {
   column: ColumnInterface;
-  deleteColumn: (id: number) => void;
-  updateColumn: (columnId: number, title: string) => void;
+  tasks: Task[];
 }
 
-const ColumnContainer: FC<ColumnContainerProps> = ({
-  column,
-  deleteColumn,
-  updateColumn,
-}) => {
-  const [editMode, setEditMode] = useState(false);
+const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
+  const { deleteColumn, updateColumn, createTask } = useContext(BoardContext);
 
   const {
     setNodeRef,
@@ -27,7 +26,6 @@ const ColumnContainer: FC<ColumnContainerProps> = ({
   } = useSortable({
     id: column.id,
     data: { type: 'Column', column },
-    disabled: editMode,
   });
 
   const style = {
@@ -67,61 +65,34 @@ const ColumnContainer: FC<ColumnContainerProps> = ({
       flex
       flex-col"
     >
-      <div
-        {...attributes}
-        {...listeners}
-        onClick={() => {
-          setEditMode(true);
-        }}
-        className="
-        bg-primaryBackground
-        text-md
-        h-[60px]
-        cursor-grab
-        rounded-md
-        rounded-b-none
-        font-bold
-        p-3
-        border-columnBackground
-        border-4
-      "
-      >
-        <div className="flex gap-2 items-center">
-          <div>{column.id}</div>
-          {editMode ? (
-            <input
-              className="
-                  bg-black 
-                  focus:border-rose-500 
-                  border-rounded 
-                  outline-none 
-                  px-2"
-              value={column.title}
-              onChange={(e) => {
-                updateColumn(column.id, e.target.value);
-              }}
-              type="text"
-              defaultValue={column.title}
-              autoFocus
-              onBlur={() => setEditMode(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setEditMode(false);
-                }
-              }}
-            />
-          ) : (
-            <div className="flex-grow">{column.title}</div>
-          )}
-          <button onClick={() => deleteColumn(column.id)}>
-            <IconTrash />
-          </button>
-        </div>
+      <div {...attributes} {...listeners}>
+        <EditableHeader
+          value={column.title}
+          onChangeValue={(value) =>
+            updateColumn(column.id, { ...column, title: value })
+          }
+          onDelete={() => deleteColumn(column.id)}
+          onUpdate={() => {
+            return;
+          }}
+          numberIndex={column.id}
+        />
       </div>
-      {/*task container */}
-      <div className="flex flex-grow">container</div>
-      <div>footer</div>
-      {/*task footer */}
+      {/*tasks container */}
+      <div className="flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto">
+        {tasks.map((t) => (
+          <TaskCard key={t.id} task={t} />
+        ))}
+      </div>
+      <button
+        className="
+        flex gap-2 items-center border-columnBackground 
+        border-2 rounded-md p-4 border-x-columnBackground 
+        hover:text-rose-500 active:bg-black"
+        onClick={() => createTask(column.id)}
+      >
+        <IconPlus /> Add tasks
+      </button>
     </div>
   );
 };
