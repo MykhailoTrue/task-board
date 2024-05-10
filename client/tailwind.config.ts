@@ -3,7 +3,12 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primaryBackground: '#0D1117',
+        columnBackground: '#161C22',
+      },
+    },
   },
   plugins: [],
 };
