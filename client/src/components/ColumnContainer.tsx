@@ -15,7 +15,10 @@ interface ColumnContainerProps {
 
 const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
   const { deleteColumn, updateColumn, createTask } = useContext(BoardContext);
-  const tasksIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
+  const tasksIds = useMemo(
+    () => tasks.map((task) => `task-${task.id}`),
+    [tasks]
+  );
 
   const {
     setNodeRef,
@@ -25,10 +28,13 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
     transition,
     isDragging,
   } = useSortable({
-    id: column.id,
+    id: `column-${column.id}`,
     data: {
       type: 'Column',
-      column,
+      column: {
+        ...column,
+        id: `column-${column.id}`,
+      },
     },
   });
 

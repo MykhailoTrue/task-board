@@ -23,10 +23,14 @@ const TaskCard: FC<TaskCardProps> = ({ task }) => {
     transition,
     isDragging,
   } = useSortable({
-    id: task.id,
+    id: `task-${task.id}`,
     data: {
       type: 'Task',
-      task,
+      task: {
+        ...task,
+        id: `task-${task.id}`,
+        columnId: `column-${task.columnId}`,
+      },
     },
   });
 

@@ -44,12 +44,12 @@ export const BoardProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     setColumns([
-      { id: 1, title: 'Column 1' },
-      { id: 2, title: 'Column 2' },
+      { id: 10, title: 'Column 1' },
+      { id: 20, title: 'Column 2' },
     ]);
     setTasks([
-      { id: 1, title: 'Task 1', content: 'Task content', columnId: 1 },
-      { id: 2, title: 'Task 2', content: 'Task content', columnId: 2 },
+      { id: 1, title: 'Task 1', content: 'Task content', columnId: 10 },
+      { id: 2, title: 'Task 2', content: 'Task content', columnId: 20 },
     ]);
   }, []);
 

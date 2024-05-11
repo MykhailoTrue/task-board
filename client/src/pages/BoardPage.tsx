@@ -22,7 +22,7 @@ const BoardPage = () => {
   const { columns, tasks, setColumns, setTasks, createColumn } =
     useContext(BoardContext);
   const columnsIds = useMemo(
-    () => columns.map((column) => column.id),
+    () => columns.map((column) => `column-${column.id}`),
     [columns]
   );
 
@@ -38,6 +38,7 @@ const BoardPage = () => {
   );
 
   const onDragStart = (event: DragStartEvent) => {
+    console.log('drag start', event);
     if (event.active.data.current?.type === 'Column') {
       setActiveColumn(event.active.data.current.column);
       return;
@@ -50,6 +51,7 @@ const BoardPage = () => {
   };
 
   const onDragEnd = (event: DragEndEvent) => {
+    console.log('drag end', event);
     setActiveColumn(null);
     setActiveTask(null);
 
@@ -65,9 +67,13 @@ const BoardPage = () => {
     if (!isActiveAColumn) return;
 
     setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
+      const activeColumnIndex = columns.findIndex(
+        (col) => `column-${col.id}` === activeId
+      );
 
-      const overColumnIndex = columns.findIndex((col) => col.id === overId);
+      const overColumnIndex = columns.findIndex(
+        (col) => `column-${col.id}` === overId
+      );
 
       return arrayMove(columns, activeColumnIndex, overColumnIndex);
     });
@@ -90,11 +96,10 @@ const BoardPage = () => {
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
       setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
-        const overIndex = tasks.findIndex((t) => t.id === overId);
+        const activeIndex = tasks.findIndex((t) => `task-${t.id}` === activeId);
+        const overIndex = tasks.findIndex((t) => `task-${t.id}` === overId);
 
         if (tasks[activeIndex].columnId != tasks[overIndex].columnId) {
-          // Fix introduced after video recording
           tasks[activeIndex].columnId = tasks[overIndex].columnId;
           return arrayMove(tasks, activeIndex, overIndex - 1);
         }
@@ -108,9 +113,9 @@ const BoardPage = () => {
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
       setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
+        const activeIndex = tasks.findIndex((t) => `task-${t.id}` === activeId);
 
-        tasks[activeIndex].columnId = overId as number;
+        tasks[activeIndex].columnId = +overId.toString().replace('column-', '');
         console.log('DROPPING TASK OVER COLUMN', { activeIndex });
         return arrayMove(tasks, activeIndex, activeIndex);
       });
