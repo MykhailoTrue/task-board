@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Column, ColumnToUpdate } from './Column';
-import { Task } from './Task';
+import { Task, TaskToUpdate } from './Task';
 
 export interface BoardContextValue {
   columns: Column[];
   tasks: Task[];
   createTask: (columnId: number) => Promise<void>;
-  updateTask: (id: number, task: Task) => Promise<void>;
+  updateTask: (id: number, task: TaskToUpdate) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
 
   createColumn: () => Promise<void>;

@@ -10,6 +10,7 @@ import { BoardColumn } from 'src/columns/columns.model';
 
 interface TaskCreationAttrs {
   title: string;
+  order: number;
   content: string;
   columnId: number;
 }
@@ -35,6 +36,12 @@ export class Task extends Model<Task, TaskCreationAttrs> {
     allowNull: false,
   })
   content: string;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  order: number;
 
   @ForeignKey(() => BoardColumn)
   @Column({ type: DataType.INTEGER })

@@ -4,11 +4,6 @@ export interface Column {
   title: string;
 }
 
-export interface ColumnWithoutId {
-  title: string;
-  order: number;
-}
-
 export interface ColumnToUpdate {
   title?: string;
   order?: number;

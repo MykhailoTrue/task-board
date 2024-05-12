@@ -18,6 +18,7 @@ import { BoardContext } from '../context/BoardContext';
 import TaskCard from '../components/TaskCard';
 import { Task } from '../types/Task';
 import { updateColumnOrder } from '../services/columnService';
+import { updateTask, updateTasksOrder } from '../services/taskService';
 
 const BoardPage = () => {
   const { columns, tasks, setColumns, setTasks, createColumn } =
@@ -99,30 +100,62 @@ const BoardPage = () => {
 
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      setTasks((tasks) => {
+      const taskToUpdateColumnId: { id?: number; columnId?: number } = {};
+      const getMovedTasks = () => {
         const activeIndex = tasks.findIndex((t) => `task-${t.id}` === activeId);
         const overIndex = tasks.findIndex((t) => `task-${t.id}` === overId);
 
         if (tasks[activeIndex].columnId != tasks[overIndex].columnId) {
           tasks[activeIndex].columnId = tasks[overIndex].columnId;
+
+          taskToUpdateColumnId.id = tasks[activeIndex].id;
+          taskToUpdateColumnId.columnId = tasks[overIndex].columnId;
+
           return arrayMove(tasks, activeIndex, overIndex - 1);
         }
 
         return arrayMove(tasks, activeIndex, overIndex);
-      });
+      };
+
+      const movedTasks = getMovedTasks();
+      const movedTasksIds = movedTasks.map((t) => t.id);
+
+      if (taskToUpdateColumnId.columnId && taskToUpdateColumnId.id) {
+        updateTask(taskToUpdateColumnId.id, {
+          columnId: taskToUpdateColumnId.columnId,
+        });
+      }
+      updateTasksOrder(movedTasksIds);
+      setTasks(movedTasks);
     }
 
     const isOverAColumn = over.data.current?.type === 'Column';
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      setTasks((tasks) => {
+      const taskToUpdateColumnId: { id?: number; columnId?: number } = {};
+      const getMovedTasks = () => {
         const activeIndex = tasks.findIndex((t) => `task-${t.id}` === activeId);
 
         tasks[activeIndex].columnId = +overId.toString().replace('column-', '');
+
+        taskToUpdateColumnId.id = tasks[activeIndex].id;
+        taskToUpdateColumnId.columnId = tasks[activeIndex].columnId;
+
         console.log('DROPPING TASK OVER COLUMN', { activeIndex });
         return arrayMove(tasks, activeIndex, activeIndex);
-      });
+      };
+
+      const movedTasks = getMovedTasks();
+      const movedTasksIds = movedTasks.map((t) => t.id);
+
+      if (taskToUpdateColumnId.columnId && taskToUpdateColumnId.id) {
+        updateTask(taskToUpdateColumnId.id, {
+          columnId: taskToUpdateColumnId.columnId,
+        });
+      }
+      updateTasksOrder(movedTasksIds);
+      setTasks(movedTasks);
     }
   };
 

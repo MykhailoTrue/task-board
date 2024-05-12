@@ -53,7 +53,7 @@ const TaskDetail = () => {
           await deleteTask(task.id);
         }}
         onUpdate={async () => {
-          await updateTask(task.id, { ...task, title });
+          await updateTask(task.id, { title });
         }}
       />
       <div className="p-3 flex flex-col">
@@ -74,7 +74,7 @@ const TaskDetail = () => {
           editContent={editContent}
           setEditContent={setEditContent}
           onUpdate={() => {
-            updateTask(task.id, { ...task, content });
+            updateTask(task.id, { content });
           }}
         />
       </div>

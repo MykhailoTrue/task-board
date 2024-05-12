@@ -22,7 +22,11 @@ export class TasksService {
   }
 
   async createTask(dto: CreateTaskDto) {
-    const task = await this.taskRepository.create(dto);
+    const maxOrder = (await this.taskRepository.max('order')) as number;
+    const task = await this.taskRepository.create({
+      ...dto,
+      order: maxOrder + 1,
+    });
     return task;
   }
 
@@ -35,5 +39,14 @@ export class TasksService {
       where: { id },
     });
     return await this.getTaskById(id);
+  }
+
+  async updateTasksOrder(tasksIds: number[]) {
+    for (let i = 0; i < tasksIds.length; i++) {
+      await this.taskRepository.update(
+        { order: i + 1 },
+        { where: { id: tasksIds[i] } },
+      );
+    }
   }
 }

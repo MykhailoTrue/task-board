@@ -64,6 +64,15 @@ export class TasksController {
     await this.tasksService.deleteTask(id);
   }
 
+  @Put('order')
+  async updateColumnOrder(@Body() body: { tasksIds: number[] }) {
+    try {
+      await this.tasksService.updateTasksOrder(body.tasksIds);
+    } catch (e) {
+      throw new BadRequestException('Bad Request');
+    }
+  }
+
   @Put(':id')
   async updateTask(
     @Param('id', ParseIntPipe) id: number,
