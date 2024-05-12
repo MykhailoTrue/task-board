@@ -3,6 +3,7 @@ import { Task } from 'src/tasks/tasks.model';
 
 interface BoardColumnCreationAttrs {
   title: string;
+  order: number;
 }
 
 @Table({ tableName: 'boardColumns' })
@@ -20,6 +21,12 @@ export class BoardColumn extends Model<BoardColumn, BoardColumnCreationAttrs> {
     allowNull: false,
   })
   title: string;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  order: number;
 
   @HasMany(() => Task, { onDelete: 'CASCADE' })
   tasks: Task[];

@@ -89,7 +89,7 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
           onChangeValue={setTitle}
           onDelete={async () => await deleteColumn(column.id)}
           onUpdate={async () => {
-            await updateColumn(column.id, { ...column, title });
+            await updateColumn(column.id, { title });
           }}
           numberIndex={tasks.length}
         />

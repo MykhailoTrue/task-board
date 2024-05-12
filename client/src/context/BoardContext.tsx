@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { BoardContextValue } from '../types/BoardContextValue';
-import { Column, ColumnWithoutId } from '../types/Column';
+import { Column, ColumnToCreate, ColumnToUpdate } from '../types/Column';
 import { Task, TaskWithoutId } from '../types/Task';
 import { useFetching } from '../hooks/useFetching';
 import {
@@ -44,7 +44,8 @@ export const BoardProvider: FC<PropsWithChildren> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const { fetching: fetchColumns } = useFetching(async () => {
-    const columns = await getColumns();
+    const columns = (await getColumns()) as Column[];
+    columns.sort((a, b) => a.order - b.order);
     setColumns(columns);
   });
 
@@ -90,17 +91,15 @@ export const BoardProvider: FC<PropsWithChildren> = ({ children }) => {
   };
 
   const createColumn = async () => {
-    const columnToAdd: ColumnWithoutId = {
+    const columnToAdd: ColumnToCreate = {
       title: `Column ${columns.length + 1}`,
     };
     const column = await createColumnService(columnToAdd);
     setColumns([...columns, column]);
   };
 
-  const updateColumn = async (columnId: number, newColumn: Column) => {
-    const updatedColumn = await updateColumnService(columnId, {
-      title: newColumn.title,
-    });
+  const updateColumn = async (columnId: number, newColumn: ColumnToUpdate) => {
+    const updatedColumn = await updateColumnService(columnId, { ...newColumn });
     const updatedColumns = columns.map((column) => {
       if (column.id === columnId) {
         return { ...updatedColumn };

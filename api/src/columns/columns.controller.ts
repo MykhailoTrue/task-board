@@ -65,6 +65,15 @@ export class ColumnsController {
     await this.columnsService.deleteColumn(id);
   }
 
+  @Put('order')
+  async updateColumnOrder(@Body() body: { columnIds: number[] }) {
+    try {
+      await this.columnsService.updateColumnOrder(body.columnIds);
+    } catch (e) {
+      throw new BadRequestException('Bad Request');
+    }
+  }
+
   @Put(':id')
   async updateTask(
     @Param('id', ParseIntPipe) id: number,

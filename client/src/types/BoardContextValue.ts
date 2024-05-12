@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Column } from './Column';
+import { Column, ColumnToUpdate } from './Column';
 import { Task } from './Task';
 
 export interface BoardContextValue {
@@ -10,7 +10,7 @@ export interface BoardContextValue {
   deleteTask: (id: number) => Promise<void>;
 
   createColumn: () => Promise<void>;
-  updateColumn: (id: number, column: Column) => Promise<void>;
+  updateColumn: (id: number, column: ColumnToUpdate) => Promise<void>;
   deleteColumn: (id: number) => Promise<void>;
 
   setTasks: Dispatch<SetStateAction<Task[]>>;

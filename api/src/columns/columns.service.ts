@@ -9,7 +9,11 @@ export class ColumnsService {
     @InjectModel(BoardColumn) private columnRepository: typeof BoardColumn,
   ) {}
   async createColumn(dto: CreateColumnDto) {
-    const column = await this.columnRepository.create(dto);
+    const maxOrder = (await this.columnRepository.max('order')) as number;
+    const column = await this.columnRepository.create({
+      ...dto,
+      order: maxOrder + 1,
+    });
     return column;
   }
   async getColumns() {
@@ -37,5 +41,14 @@ export class ColumnsService {
   async updateColumn(id: number, dto: CreateColumnDto) {
     await this.columnRepository.update(dto, { where: { id } });
     return await this.getColumnById(id);
+  }
+
+  async updateColumnOrder(columnIds: number[]) {
+    for (let i = 0; i < columnIds.length; i++) {
+      await this.columnRepository.update(
+        { order: i + 1 },
+        { where: { id: columnIds[i] } },
+      );
+    }
   }
 }

@@ -17,6 +17,7 @@ import { createPortal } from 'react-dom';
 import { BoardContext } from '../context/BoardContext';
 import TaskCard from '../components/TaskCard';
 import { Task } from '../types/Task';
+import { updateColumnOrder } from '../services/columnService';
 
 const BoardPage = () => {
   const { columns, tasks, setColumns, setTasks, createColumn } =
@@ -66,17 +67,20 @@ const BoardPage = () => {
     const isActiveAColumn = active.data.current?.type === 'Column';
     if (!isActiveAColumn) return;
 
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex(
+    const getMovedColumns = () => {
+      const activeIndex = columns.findIndex(
         (col) => `column-${col.id}` === activeId
       );
-
-      const overColumnIndex = columns.findIndex(
+      const overIndex = columns.findIndex(
         (col) => `column-${col.id}` === overId
       );
+      return arrayMove(columns, activeIndex, overIndex);
+    };
+    const movedColumns = getMovedColumns();
+    const movedColumnsIds = movedColumns.map((c) => c.id);
+    updateColumnOrder(movedColumnsIds);
 
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
-    });
+    setColumns(movedColumns);
   };
 
   const onDragOver = (event: DragOverEvent) => {
