@@ -6,8 +6,21 @@ import {
   useState,
 } from 'react';
 import { BoardContextValue } from '../types/BoardContextValue';
-import { Column } from '../types/Column';
-import { Task } from '../types/Task';
+import { Column, ColumnWithoutId } from '../types/Column';
+import { Task, TaskWithoutId } from '../types/Task';
+import { useFetching } from '../hooks/useFetching';
+import {
+  getColumns,
+  createColumn as createColumnService,
+  updateColumn as updateColumnService,
+  deleteColumn as deleteColumnService,
+} from '../services/columnService';
+import {
+  getTasks,
+  createTask as createTaskService,
+  updateTask as updateTaskService,
+  deleteTask as deleteTaskService,
+} from '../services/taskService';
 
 export const BoardContext = createContext<BoardContextValue>({
   columns: [],
@@ -18,85 +31,87 @@ export const BoardContext = createContext<BoardContextValue>({
   setTasks: () => {
     return;
   },
-  createTask: () => {
-    return;
-  },
-  updateTask: () => {
-    return;
-  },
-  deleteTask: () => {
-    return;
-  },
-  createColumn: () => {
-    return;
-  },
-  updateColumn: () => {
-    return;
-  },
-  deleteColumn: () => {
-    return;
-  },
+  createTask: () => Promise.resolve(),
+  updateTask: () => Promise.resolve(),
+  deleteTask: () => Promise.resolve(),
+  createColumn: () => Promise.resolve(),
+  updateColumn: () => Promise.resolve(),
+  deleteColumn: () => Promise.resolve(),
 });
 
 export const BoardProvider: FC<PropsWithChildren> = ({ children }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  const { fetching: fetchColumns } = useFetching(async () => {
+    const columns = await getColumns();
+    setColumns(columns);
+  });
+
+  const { fetching: fetchTasks } = useFetching(async () => {
+    const tasks = await getTasks();
+    setTasks(tasks);
+  });
+
   useEffect(() => {
-    setColumns([
-      { id: 10, title: 'Column 1' },
-      { id: 20, title: 'Column 2' },
-    ]);
-    setTasks([
-      { id: 1, title: 'Task 1', content: 'Task content', columnId: 10 },
-      { id: 2, title: 'Task 2', content: 'Task content', columnId: 20 },
-    ]);
+    fetchColumns();
+    fetchTasks();
   }, []);
 
-  const createTask = (columnId: number) => {
-    const taskToAdd: Task = {
-      id: tasks.length + 1,
+  const createTask = async (columnId: number) => {
+    const taskToAdd: TaskWithoutId = {
       title: `Task ${tasks.length + 1}`,
       content: 'Task content',
       columnId,
     };
-    setTasks([...tasks, taskToAdd]);
+    const task = await createTaskService(taskToAdd);
+    setTasks([...tasks, task]);
   };
 
-  const updateTask = (taskId: number, newTask: Task) => {
+  const updateTask = async (taskId: number, newTask: Task) => {
+    const updatedTask = await updateTaskService(taskId, {
+      title: newTask.title,
+      content: newTask.content,
+      columnId: newTask.columnId,
+    });
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
-        return { ...newTask };
+        return { ...updatedTask };
       }
       return task;
     });
     setTasks(updatedTasks);
   };
 
-  const deleteTask = (id: number) => {
+  const deleteTask = async (id: number) => {
+    await deleteTaskService(id);
     const filteredTasks = tasks.filter((task) => task.id !== id);
     setTasks(filteredTasks);
   };
 
-  const createColumn = () => {
-    const columnToAdd: Column = {
-      id: columns.length + 1,
+  const createColumn = async () => {
+    const columnToAdd: ColumnWithoutId = {
       title: `Column ${columns.length + 1}`,
     };
-    setColumns([...columns, columnToAdd]);
+    const column = await createColumnService(columnToAdd);
+    setColumns([...columns, column]);
   };
 
-  const updateColumn = (columnId: number, newColumn: Column) => {
+  const updateColumn = async (columnId: number, newColumn: Column) => {
+    const updatedColumn = await updateColumnService(columnId, {
+      title: newColumn.title,
+    });
     const updatedColumns = columns.map((column) => {
       if (column.id === columnId) {
-        return { ...newColumn };
+        return { ...updatedColumn };
       }
       return column;
     });
     setColumns(updatedColumns);
   };
 
-  const deleteColumn = (id: number) => {
+  const deleteColumn = async (id: number) => {
+    await deleteColumnService(id);
     const filteredColumns = columns.filter((col) => col.id !== id);
     setColumns(filteredColumns);
   };

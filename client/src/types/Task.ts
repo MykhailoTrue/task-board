@@ -4,3 +4,9 @@ export type Task = {
   content: string;
   columnId: number;
 };
+
+export type TaskWithoutId = {
+  title: string;
+  content: string;
+  columnId: number;
+};

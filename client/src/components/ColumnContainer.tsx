@@ -1,4 +1,4 @@
-import { FC, useContext, useMemo } from 'react';
+import { FC, useContext, useMemo, useState } from 'react';
 import { Column as ColumnInterface } from '../types/Column';
 import { IconPlus } from '@tabler/icons-react';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
@@ -7,6 +7,8 @@ import { Task } from '../types/Task';
 import TaskCard from './TaskCard';
 import EditableHeader from './EditableHeader';
 import { BoardContext } from '../context/BoardContext';
+import { useFetching } from '../hooks/useFetching';
+import Loader from './ui/ModalWindow/Loader';
 
 interface ColumnContainerProps {
   column: ColumnInterface;
@@ -19,6 +21,11 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
     () => tasks.map((task) => `task-${task.id}`),
     [tasks]
   );
+
+  const { fetching: createTaskFetching, isLoading: isTaskCreating } =
+    useFetching(createTask);
+
+  const [title, setTitle] = useState(column.title);
 
   const {
     setNodeRef,
@@ -73,19 +80,18 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
       max-h-[500px]
       rounded-md
       flex
-      flex-col"
+      flex-col
+      bg-columnBackground"
     >
       <div {...attributes} {...listeners}>
         <EditableHeader
-          value={column.title}
-          onChangeValue={(value) =>
-            updateColumn(column.id, { ...column, title: value })
-          }
-          onDelete={() => deleteColumn(column.id)}
-          onUpdate={() => {
-            return;
+          value={title}
+          onChangeValue={setTitle}
+          onDelete={async () => await deleteColumn(column.id)}
+          onUpdate={async () => {
+            await updateColumn(column.id, { ...column, title });
           }}
-          numberIndex={column.id}
+          numberIndex={tasks.length}
         />
       </div>
       {/*tasks container */}
@@ -96,15 +102,19 @@ const ColumnContainer: FC<ColumnContainerProps> = ({ column, tasks }) => {
           ))}
         </SortableContext>
       </div>
-      <button
-        className="
-        flex gap-2 items-center border-columnBackground 
-        border-2 rounded-md p-4 border-x-columnBackground 
-        hover:text-rose-500 active:bg-black"
-        onClick={() => createTask(column.id)}
-      >
-        <IconPlus /> Add tasks
-      </button>
+      {isTaskCreating ? (
+        <Loader />
+      ) : (
+        <button
+          className="
+      flex gap-2 items-center border-columnBackground 
+      border-2 rounded-md p-4 border-x-columnBackground 
+      hover:text-rose-500 active:bg-black"
+          onClick={() => createTaskFetching(column.id)}
+        >
+          <IconPlus /> Add tasks
+        </button>
+      )}
     </div>
   );
 };

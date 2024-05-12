@@ -6,6 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const allowedOrigins = process.env.ALLOWED_ORIGINS || '';
   const whitelist = allowedOrigins.split(',').map((item) => item.trim());
+  whitelist.push(undefined);
+
   app.enableCors({
     origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
@@ -14,9 +16,9 @@ async function bootstrap() {
         callback(new Error('Not allowed by CORS'));
       }
     },
-    allowedHeaders: '*',
-    methods: '*',
-    credentials: true,
+    allowedHeaders:
+      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
+    methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
   });
   await app.listen(PORT);
 }

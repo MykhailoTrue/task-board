@@ -1,11 +1,13 @@
 import { IconTrash } from '@tabler/icons-react';
 import { FC, useState } from 'react';
+import { useFetching } from '../hooks/useFetching';
+import Loader from './ui/ModalWindow/Loader';
 
 interface EditableHeaderProps {
   value: string;
   onChangeValue: (value: string) => void;
-  onDelete: () => void;
-  onUpdate: () => void;
+  onDelete: () => Promise<void>;
+  onUpdate: () => Promise<void>;
   numberIndex?: number;
 }
 
@@ -17,6 +19,16 @@ const EditableHeader: FC<EditableHeaderProps> = ({
   numberIndex,
 }) => {
   const [editMode, setEditMode] = useState(false);
+
+  const { fetching: deleteEntity, isLoading: isDeleting } =
+    useFetching(onDelete);
+
+  const { fetching: updateEntity, isLoading: isUpdating } =
+    useFetching(onUpdate);
+
+  if (isDeleting || isUpdating) {
+    return <Loader />;
+  }
 
   return (
     <div
@@ -53,18 +65,21 @@ const EditableHeader: FC<EditableHeaderProps> = ({
             }}
             type="text"
             autoFocus
-            onBlur={() => setEditMode(false)}
-            onKeyDown={(e) => {
+            onBlur={async () => {
+              setEditMode(false);
+              await updateEntity();
+            }}
+            onKeyDown={async (e) => {
               if (e.key === 'Enter') {
                 setEditMode(false);
-                onUpdate();
+                await updateEntity();
               }
             }}
           />
         ) : (
           <div className="flex-grow">{value}</div>
         )}
-        <button onClick={() => onDelete()}>
+        <button onClick={async () => await deleteEntity()}>
           <IconTrash />
         </button>
       </div>

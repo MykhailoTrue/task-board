@@ -1,34 +1,59 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BoardContext } from '../context/BoardContext';
 import EditableHeader from './EditableHeader';
 import { IconEdit } from '@tabler/icons-react';
 import EditableContent from './EditableContent';
+import { getTaskById } from '../services/taskService';
+import { Task } from '../types/Task';
+import { useFetching } from '../hooks/useFetching';
+import Loader from './ui/ModalWindow/Loader';
 
 const TaskDetail = () => {
   const { id } = useParams();
-  const { tasks, updateTask, deleteTask } = useContext(BoardContext);
+  const { updateTask, deleteTask } = useContext(BoardContext);
+  const [editContent, setEditContent] = useState(false);
+  const [task, setTask] = useState<Task | null>(null);
+
   const navigate = useNavigate();
 
-  const task = tasks.find((task) => task.id === +(id as string));
-  const [editContent, setEditContent] = useState(false);
+  const {
+    fetching: fetchTask,
+    isLoading: isTaskFetching,
+    error,
+  } = useFetching(async () => {
+    const task = await getTaskById(+id! as number);
+    setTask(task);
+    setTitle(task.title);
+  });
+
+  useEffect(() => {
+    fetchTask();
+  }, []);
+
   const [content, setContent] = useState(task?.content || '');
 
-  if (!task) {
+  const [title, setTitle] = useState(task?.title || '');
+
+  if (error) {
     navigate('/board');
-    return <></>;
   }
+
+  if (isTaskFetching || !task) {
+    return <Loader />;
+  }
+
   return (
     <div>
       <EditableHeader
-        value={task.title}
-        onChangeValue={(title) => updateTask(task.id, { ...task, title })}
-        onDelete={() => {
+        value={title}
+        onChangeValue={setTitle}
+        onDelete={async () => {
           navigate('/board');
-          deleteTask(task.id);
+          await deleteTask(task.id);
         }}
-        onUpdate={() => {
-          return;
+        onUpdate={async () => {
+          await updateTask(task.id, { ...task, title });
         }}
       />
       <div className="p-3 flex flex-col">
