@@ -1,0 +1,22 @@
+.modal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  @apply bg-columnBackground;
+}
+
+.modalContent {
+  padding: 25px;
+  @apply bg-primaryBackground;
+  border-radius: 16px;
+  min-width: 350px;
+  min-height: 350px;
+}
+
+.modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
